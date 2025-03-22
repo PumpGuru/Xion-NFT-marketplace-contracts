@@ -1,0 +1,1 @@
+/products/xion_nft_marketplace_contracts-main/target/debug/libaccount_manager.so: /products/xion_nft_marketplace_contracts-main/contracts/account_manager/src/contract.rs /products/xion_nft_marketplace_contracts-main/contracts/account_manager/src/lib.rs
