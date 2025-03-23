@@ -1,3 +1,4 @@
+use cw721::Expiration;
 use cw721_base::MintMsg;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -11,5 +12,10 @@ pub enum ExecuteMsg<T> {
     Mint(MintMsg<T>),
     /// Updates metadata of the NFT
     UpdateMetadata { token_id: String, token_uri: String, metadata: Metadata },
-    
+    Approve {
+        spender: String,
+        token_id: String,
+        expires: Option<Expiration>,
+    },
+    TransferNft{ recipient: String, token_id: String },
 }

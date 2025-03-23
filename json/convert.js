@@ -4,10 +4,10 @@ const { stringify } = require('querystring');
 // Step 1: Prepare the ListingHookMsg
 const listingHookMsg = {
   set_listing: {
-    owner: 'xion1vyv8t7lj96g0pxhct49zzzscpy6jwqedjckzlx', // Replace with the owner's address
-    collection: 'xion128xznqk24ll4qh8yt3rde53thtfa45hv23jzug6536n4hv564a5qug8raf',
-    token_id: '2', // Replace with the token ID
-    price: '1', // Replace with the price
+    owner: 'xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e', // Replace with the owner's address
+    collection: 'xion16pxfzmt6h9fj8eywgcew5e3j52fj4uaa6vqzjxv0du8xs46fkfjslz6ysk',
+    token_id: '0', // Replace with the token ID
+    price: '10000', // Replace with the price
     royalty: '1', // Replace with the royalty percentage
   },
 };
@@ -19,8 +19,8 @@ const msgBase64 = encode(listingHookMsgJson);
 // Step 3: Construct the final JSON payload
 const executeMsg = {
   ListNftForSale: {
-    sender: 'xion1vyv8t7lj96g0pxhct49zzzscpy6jwqedjckzlx', // Replace with the sender's address
-    token_id: '2', // Replace with the token ID
+    sender: 'xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e', // Replace with the sender's address
+    token_id: '0', // Replace with the token ID
     msg: msgBase64, // Base64-encoded ListingHookMsg
   },
 };

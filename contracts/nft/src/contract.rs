@@ -4,9 +4,9 @@ use serde::{Deserialize, Serialize};
 use cosmwasm_std::Empty;
 use cw2::set_contract_version;
 
+use cw721::Expiration;
 use cw721_base::Cw721Contract;
 use cw721_base::InstantiateMsg;
-
 // Version info for migration
 const CONTRACT_NAME: &str = "crates.io:cw721-metadata-onchain";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -41,7 +41,7 @@ pub type QueryMsg = cw721_base::QueryMsg;
 #[cfg(not(feature = "library"))]
 pub mod entry {
     use super::*;
-
+    
     use crate::msg::ExecuteMsg;
     use cosmwasm_std::entry_point;
     use cosmwasm_std::{Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
@@ -77,7 +77,16 @@ pub mod entry {
         match msg {
             ExecuteMsg::Mint(mint_msg) => {
                 Cw721MetadaNonTransferableContract::default().mint(deps, env, info, mint_msg)
-            }
+            },
+            ExecuteMsg::Approve {
+                spender,
+                token_id,
+                expires,
+            } => execute_approve(deps, env, info, spender, token_id, expires),
+            ExecuteMsg::TransferNft {
+                recipient,
+                token_id
+            } => execute_transfer_nft(deps, env, info, recipient, token_id),
             ExecuteMsg::UpdateMetadata {
                 token_id,
                 token_uri,
@@ -97,7 +106,7 @@ pub mod entry {
         info: MessageInfo,
         token_id: String,
         token_uri: String,
-        metadata: Metadata
+        metadata: Metadata,
     ) -> Result<Response, ContractError> {
         let tract = Cw721MetadaNonTransferableContract::default();
         let minter = tract.minter.load(deps.storage)?;
@@ -111,11 +120,46 @@ pub mod entry {
                         token_info.extension = Some(metadata);
                         token_info.token_uri = Some(token_uri.clone());
                         Ok(token_info)
-                    },
+                    }
                     None => Err(ContractError::Unauthorized {}),
                 })?;
             Ok(Response::new())
         }
+    }
+
+    fn execute_approve(
+        deps: DepsMut,
+        env: Env,
+        info: MessageInfo,
+        spender: String,
+        token_id: String,
+        expires: Option<Expiration>,
+    ) -> Result<Response, ContractError> {
+        let token_info = Cw721MetadaNonTransferableContract::default()
+            ._update_approvals(deps, &env, &info, &spender, &token_id, true, expires)?;
+
+        Ok(Response::new()
+            .add_attribute("action", "approve")
+            .add_attribute("spender", spender)
+            .add_attribute("token_id", token_id)
+            .add_attribute("owner", token_info.owner))
+    }
+
+    fn execute_transfer_nft(
+        deps: DepsMut,
+        env: Env,
+        info: MessageInfo,
+        recipient: String,
+        token_id: String,
+    ) -> Result<Response, ContractError> {
+        let token_info = Cw721MetadaNonTransferableContract::default()
+            ._transfer_nft(deps, &env, &info, &recipient, &token_id)?;
+
+        Ok(Response::new()
+            .add_attribute("action", "approve")
+            .add_attribute("recipient", recipient)
+            .add_attribute("token_id", token_id)
+            .add_attribute("owner", token_info.owner))
     }
 }
 
