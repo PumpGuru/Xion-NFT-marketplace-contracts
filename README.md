@@ -185,7 +185,7 @@ echo $NFT_CONTRACT
 
 
 ### NFT  Mint 
-NFT_CONTRACT=xion187vknfjd9a5yyy77nxs432axv2p7rah6rf96fpd70eeyklvgyjxs04r8rx
+NFT_CONTRACT=xion16pxfzmt6h9fj8eywgcew5e3j52fj4uaa6vqzjxv0du8xs46fkfjslz6ysk
 TRX_COMMAND='{"mint": {
     "token_id": "0",
     "owner": "xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e",
@@ -207,8 +207,8 @@ xiond tx wasm execute $NFT_CONTRACT "$TRX_COMMAND" \
 
 
 ### Approve NFT item to marketplace contract
-MARKETPLACE_CONTRACT=xion1wvdju7dxvxfsmc9v88jvw0yht36mh0hzxcxuzu3ks8up9l8mvgvsq4e37y
-NFT_CONTRACT=xion187vknfjd9a5yyy77nxs432axv2p7rah6rf96fpd70eeyklvgyjxs04r8rx
+MARKETPLACE_CONTRACT=xion14j55majznaasw9upyf7ddpflrpy4qakag034wgs7wjdfn0q52fkqjvavld
+NFT_CONTRACT=xion16pxfzmt6h9fj8eywgcew5e3j52fj4uaa6vqzjxv0du8xs46fkfjslz6ysk
 APPROVE_MSG='{"approve":{"spender":"'$MARKETPLACE_CONTRACT'","token_id":"2"}}'
 xiond tx wasm execute $NFT_CONTRACT "$APPROVE_MSG" \
   --from $WALLET \
@@ -229,7 +229,7 @@ xiond query wasm contract-state smart $NFT_CONTRACT "$QUERY" --output json --nod
 
 ### List NFT on marketplace
 WALLET=xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e
-MARKETPLACE_CONTRACT=xion1wvdju7dxvxfsmc9v88jvw0yht36mh0hzxcxuzu3ks8up9l8mvgvsq4e37y
+MARKETPLACE_CONTRACT=xion14j55majznaasw9upyf7ddpflrpy4qakag034wgs7wjdfn0q52fkqjvavld
 LIST_NFT='{
   "ListNftForSale": {
     "sender": "xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e",
@@ -248,7 +248,7 @@ xiond tx wasm execute $MARKETPLACE_CONTRACT "$LIST_NFT" \
 
 
 #### Get Listing Count
-MARKETPLACE_CONTRACT=xion1wvdju7dxvxfsmc9v88jvw0yht36mh0hzxcxuzu3ks8up9l8mvgvsq4e37y
+MARKETPLACE_CONTRACT=xion14j55majznaasw9upyf7ddpflrpy4qakag034wgs7wjdfn0q52fkqjvavld
 QUERY='{"GetListingCount":{}}'
 xiond query wasm contract-state smart $MARKETPLACE_CONTRACT "$QUERY" --output json --node https://rpc.xion-testnet-2.burnt.com:443
 
@@ -262,7 +262,7 @@ xiond query wasm contract-state smart $MARKETPLACE_CONTRACT "$QUERY" --output js
 
 ### Buy NFT
 WALLET=xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e
-MARKETPLACE_CONTRACT=xion1wvdju7dxvxfsmc9v88jvw0yht36mh0hzxcxuzu3ks8up9l8mvgvsq4e37y
+MARKETPLACE_CONTRACT=xion14j55majznaasw9upyf7ddpflrpy4qakag034wgs7wjdfn0q52fkqjvavld
 BUY_NFT='{"BuyNft": {"collection":"'$NFT_CONTRACT'", "token_id":"0"}}'
 xiond tx wasm execute $MARKETPLACE_CONTRACT "$BUY_NFT" \
   --amount 10000uxion \
