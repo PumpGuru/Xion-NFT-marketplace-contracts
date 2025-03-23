@@ -7,7 +7,7 @@ A decentralized marketplace smart contract built on the Cosmos blockchain using 
 ## Overview
 
 - [CosmWasm](https://github.com/CosmWasm/cosmwasm)
-- 
+
 ## Key Features
 * NFT Listing: Intuitive interface for users to create listings for their NFTs, including descriptive metadata, pricing, and media.
 * Offer System: Streamlined process for buyers to make offers on listed NFTs, fostering transparent negotiation.
@@ -29,10 +29,10 @@ make a better readme.md  using readme operators
 
 
 
-#########################################################################
-#########                   Contract Deploy                  ############
-#########################################################################
-# xion install
+
+## 01. Contract Deploy  
+
+### xion install
 wget https://github.com/burnt-labs/xion/releases/download/v17.0.0/xiond_17.0.0_linux_amd64.tgz
 
 xiond q bank balances xion1vyv8t7lj96g0pxhct49zzzscpy6jwqedjckzlx --node https://rpc.xion-testnet-2.burnt.com:443 
@@ -132,13 +132,12 @@ MSG='{"user_code_hash": "1234567890abcdefgh", "creator_code_hash":"1234567890abc
 
 
 
-#########################################################################
-#########                       Actions                      ############
-#########################################################################
 
-#///////////// NFT Collection Deploy ///////////////////////////
+## 02. Actions
 
-#------------ Upload Optimized Contract On-chain --------
+### NFT Collection Deploy
+
+#### Upload Optimized Contract On-chain
 WALLET=xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e
 RES=$(xiond tx wasm store ./artifacts/nft.wasm \
       --chain-id xion-testnet-2 \
@@ -151,7 +150,7 @@ RES=$(xiond tx wasm store ./artifacts/nft.wasm \
 
 echo $RES
 
-#------------ Retrieve the Code ID -----------------------
+#### Retrieve the Code ID
 TXHASH="yourHASH"
 CODE_ID=$(xiond query tx $TXHASH \
   --node https://rpc.xion-testnet-2.burnt.com:443 \
@@ -159,7 +158,7 @@ CODE_ID=$(xiond query tx $TXHASH \
 
 echo $CODE_ID
 
-#------------ Instantiate the Contract -------------------
+#### Instantiate the Contract
 MSG='{
     "minter": "xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e",
     "name": "TestNFTCollection01",
@@ -175,7 +174,7 @@ xiond tx wasm instantiate $CODE_ID "$MSG" \
   --chain-id xion-testnet-2 \
   --node https://rpc.xion-testnet-2.burnt.com:443
 
-#------------ Retrieve the Contract Address -------------
+#### Retrieve the Contract Address
 TXHASH="yourHASH"
 NFT_CONTRACT=$(xiond query tx $TXHASH \
   --node https://rpc.xion-testnet-2.burnt.com:443 \
@@ -185,7 +184,7 @@ echo $NFT_CONTRACT
 
 
 
-#/////////////     NFT  Mint    ////////////////////////
+### NFT  Mint 
 NFT_CONTRACT=xion187vknfjd9a5yyy77nxs432axv2p7rah6rf96fpd70eeyklvgyjxs04r8rx
 TRX_COMMAND='{"mint": {
     "token_id": "0",
@@ -206,7 +205,8 @@ xiond tx wasm execute $NFT_CONTRACT "$TRX_COMMAND" \
 
 
 
-#/////////////     Approve NFT item to marketplace contract     ////////////////////////
+
+### Approve NFT item to marketplace contract
 MARKETPLACE_CONTRACT=xion1wvdju7dxvxfsmc9v88jvw0yht36mh0hzxcxuzu3ks8up9l8mvgvsq4e37y
 NFT_CONTRACT=xion187vknfjd9a5yyy77nxs432axv2p7rah6rf96fpd70eeyklvgyjxs04r8rx
 APPROVE_MSG='{"approve":{"spender":"'$MARKETPLACE_CONTRACT'","token_id":"2"}}'
@@ -220,15 +220,14 @@ xiond tx wasm execute $NFT_CONTRACT "$APPROVE_MSG" \
   --chain-id xion-testnet-2
 
 
-
-#/////////////   get owner of NFT item   ////////////////////////
+#### Get owner of NFT item
 QUERY='{"owner_of":{"token_id":"2"}}'
 xiond query wasm contract-state smart $NFT_CONTRACT "$QUERY" --output json --node https://rpc.xion-testnet-2.burnt.com:443
 
 
 
 
-#/////////////     NFT  List    ////////////////////////
+### List NFT on marketplace
 WALLET=xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e
 MARKETPLACE_CONTRACT=xion1wvdju7dxvxfsmc9v88jvw0yht36mh0hzxcxuzu3ks8up9l8mvgvsq4e37y
 LIST_NFT='{
@@ -248,22 +247,20 @@ xiond tx wasm execute $MARKETPLACE_CONTRACT "$LIST_NFT" \
   --chain-id xion-testnet-2
 
 
-
-#///////////////     Get Listing Count     ////////////////////////
+#### Get Listing Count
 MARKETPLACE_CONTRACT=xion1wvdju7dxvxfsmc9v88jvw0yht36mh0hzxcxuzu3ks8up9l8mvgvsq4e37y
 QUERY='{"GetListingCount":{}}'
 xiond query wasm contract-state smart $MARKETPLACE_CONTRACT "$QUERY" --output json --node https://rpc.xion-testnet-2.burnt.com:443
 
-#///////////////     Get Listing Item      ////////////////////////
+
+#### Get Listing Item
 QUERY='{"GetListingByIndex":{"index":"0"}}'
 xiond query wasm contract-state smart $MARKETPLACE_CONTRACT "$QUERY" --output json --node https://rpc.xion-testnet-2.burnt.com:443
 
 
 
 
-
-
-#/////////////     Buy NFT     ////////////////////////
+### Buy NFT
 WALLET=xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e
 MARKETPLACE_CONTRACT=xion1wvdju7dxvxfsmc9v88jvw0yht36mh0hzxcxuzu3ks8up9l8mvgvsq4e37y
 BUY_NFT='{"BuyNft": {"collection":"'$NFT_CONTRACT'", "token_id":"0"}}'
@@ -284,17 +281,9 @@ xiond tx wasm execute $MARKETPLACE_CONTRACT "$BUY_NFT" \
 
 
 
-
-
-
-
-
-
-
-
-#////////////////  Transfer Xion   /////////////////////////
-xiond tx bank send xion1lz9v7xqwvn28engpl2qlqslc8lk9u8rfppwwxz xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e 2xion \
-  --from mykey1 \
+### Transfer Xion
+xiond tx bank send <from_address> <to_address> 2xion \
+  --from <from_address> \
   --chain-id xion-testnet-2 \
   --node https://rpc.xion-testnet-2.burnt.com:443 \
   --gas-prices 0.025uxion \
