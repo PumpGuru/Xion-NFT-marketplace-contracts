@@ -294,8 +294,8 @@ xiond tx bank send <from_address> <to_address> 2xion \
 
 
 
-NFT_Marketplace: xion1wvdju7dxvxfsmc9v88jvw0yht36mh0hzxcxuzu3ks8up9l8mvgvsq4e37y
-CW20 token impl   xion1nndkf299q2sfkjxxp60zfpqz87ju7374durk9haeqjuncclw64dqa0geqj
-NFT token impl: xion187vknfjd9a5yyy77nxs432axv2p7rah6rf96fpd70eeyklvgyjxs04r8rx
-User: xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e
-AccountManager: xion18fjq9gnzjmjgs5tmle94654uhu8vjfj25d82n8skxk7cu0jksf4qztqqkn
+- NFT_Marketplace: xion1wvdju7dxvxfsmc9v88jvw0yht36mh0hzxcxuzu3ks8up9l8mvgvsq4e37y
+- CW20 token impl   xion1nndkf299q2sfkjxxp60zfpqz87ju7374durk9haeqjuncclw64dqa0geqj
+- NFT token impl: xion187vknfjd9a5yyy77nxs432axv2p7rah6rf96fpd70eeyklvgyjxs04r8rx
+- User: xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e
+- AccountManager: xion18fjq9gnzjmjgs5tmle94654uhu8vjfj25d82n8skxk7cu0jksf4qztqqkn
