@@ -7,7 +7,7 @@ use cosmwasm_std::{
 use crate::msg::{AuctionListingHookMsg, ExecuteMsg, InstantiateMsg, ListingHookMsg, QueryMsg};
 use cosmwasm_std::{ensure, CosmosMsg, StdError};
 use cw2::set_contract_version;
-use cw721::Cw721ReceiveMsg;
+use cw721::{Cw721ExecuteMsg, Cw721ReceiveMsg};
 use cw_utils::must_pay;
 
 use crate::state::{
@@ -101,60 +101,73 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
 // Implement the contract's logic
 pub fn list_nft_for_sale(
     deps: DepsMut,
-    _env: Env,
+    env: Env,
     info: MessageInfo,
     cw721_msg: Cw721ReceiveMsg,
 ) -> StdResult<Response> {
     match from_json(&cw721_msg.msg) {
         Ok(ListingHookMsg::SetListing {
             owner,
+            collection,
             token_id,
             price,
             royalty,
-        }) => execute_list_nft_for_sale(deps, info, owner, token_id, price, royalty),
+        }) => {
+            execute_list_nft_for_sale(deps, env, info, owner, collection, token_id, price, royalty)
+        }
         _ => Err(StdError::generic_err("Invalid ListingHookMsg")),
     }
 }
 
 fn execute_list_nft_for_sale(
     deps: DepsMut,
-    info: MessageInfo,
+    env: Env,
+    _info: MessageInfo,
     owner: String,
+    collection: String,
     token_id: String,
     price: Uint128,
     royalty: Uint128,
 ) -> StdResult<Response> {
-    let collection_contract = info.sender.clone().into_string();
     // Check if the NFT is already listed
-    if DEPOSITS.has(deps.storage, (&collection_contract, &owner, &token_id)) == true {
+    if DEPOSITS.has(deps.storage, (&collection, &owner, &token_id)) == true {
         return Err(StdError::generic_err("NFT is already listed"));
     }
 
     let deposit = Deposits {
         owner: owner.clone(),
-        collection: collection_contract.clone(),
+        collection: collection.clone(),
         token_id: token_id.clone(),
     };
-    DEPOSITS.save(
-        deps.storage,
-        (&collection_contract, &owner, &token_id),
-        &deposit,
-    )?;
+    DEPOSITS.save(deps.storage, (&collection, &owner, &token_id), &deposit)?;
 
     let listing = Listing {
         seller: owner.clone(),
-        collection: collection_contract.clone(),
+        collection: collection.clone(),
         token_id: token_id.clone(),
         price: price.clone(),
         royalty: royalty.clone(),
     };
     let mut state = STATE.load(deps.storage)?;
     state.listing_count += 1;
-    LISTINGS.save(deps.storage, (&collection_contract, &token_id), &listing)?;
+    LISTINGS.save(deps.storage, (&collection, &token_id), &listing)?;
     STATE.save(deps.storage, &state)?;
+
+    // Transfer the NFT from the seller to the marketplace contract
+    let transfer_to_marketplace_msg = Cw721ExecuteMsg::TransferNft {
+        recipient: env.contract.address.to_string(), // Marketplace contract address
+        token_id: token_id.clone(),
+    };
+
+    let execute_transfer_to_marketplace = WasmMsg::Execute {
+        contract_addr: collection.to_string(),
+        msg: to_json_binary(&transfer_to_marketplace_msg)?,
+        funds: vec![],
+    };
 
     // Return the response with the approval message
     Ok(Response::new()
+        .add_message(execute_transfer_to_marketplace)
         .add_attribute("method", "list_nft_for_sale")
         .add_attribute("listing_id", state.listing_count.to_string()))
 }
@@ -208,7 +221,7 @@ fn buy_nft(
 ) -> StdResult<Response> {
     let config = CONFIG.load(deps.storage)?;
     let buyer = info.sender.to_string();
-    let funds_sent = must_pay(&info, &config.native_denom).unwrap();
+    let funds_sent = must_pay(&info, &config.native_denom).map_err(|e| StdError::generic_err(e.to_string()))?;
     // Load the listing
     let listing = LISTINGS.may_load(deps.storage, (&collection, &token_id))?;
     let state = STATE.load(deps.storage)?;
@@ -221,7 +234,7 @@ fn buy_nft(
                 StdError::generic_err("You cannot buy your own NFT")
             );
             // Calculate the royalty amount
-            let royalty_amount = listing.price.multiply_ratio(config.royalty, 100u128); // royalty = (listing.price * config.royalty) / 100
+            let royalty_amount = listing.price.multiply_ratio(listing.royalty, 100u128); // royalty = (listing.price * config.royalty) / 100
 
             if funds_sent != listing.price {
                 Err(StdError::generic_err("Invalid amount"))
@@ -366,6 +379,7 @@ pub fn list_nft_for_auction(
     match from_json(&cw721_msg.msg) {
         Ok(AuctionListingHookMsg::SetAuctionListing {
             owner,
+            collection,
             token_id,
             start_price,
             start_time,
@@ -377,6 +391,7 @@ pub fn list_nft_for_auction(
             env,
             info,
             owner,
+            collection,
             token_id,
             start_price,
             min_bid_step,
@@ -391,8 +406,9 @@ pub fn list_nft_for_auction(
 pub fn execute_list_nft_for_auction(
     deps: DepsMut,
     env: Env,
-    info: MessageInfo,
+    _info: MessageInfo,
     owner: String,
+    collection: String,
     token_id: String,
     start_price: Uint128,
     min_bid_step: Uint128,
@@ -400,7 +416,6 @@ pub fn execute_list_nft_for_auction(
     end_time: Uint64,
     royalty: Uint128,
 ) -> StdResult<Response> {
-    let collection = info.sender.clone().into_string();
     // Check if the caller is the NFT owner
     let nft_owner: Addr = deps.querier.query_wasm_smart(
         collection.clone(),
@@ -466,8 +481,20 @@ pub fn execute_list_nft_for_auction(
         &deposit,
     )?;
 
+    // Transfer the NFT from the seller to the marketplace contract
+    let transfer_to_marketplace_msg = Cw721ExecuteMsg::TransferNft {
+        recipient: env.contract.address.to_string(), // Marketplace contract address
+        token_id: token_id.clone(),
+    };
+
+    let execute_transfer_to_marketplace = WasmMsg::Execute {
+        contract_addr: collection.to_string(),
+        msg: to_json_binary(&transfer_to_marketplace_msg)?,
+        funds: vec![],
+    };
     // Emit an event (using attributes in CosmWasm)
     let response = Response::new()
+        .add_message(execute_transfer_to_marketplace)
         .add_attribute("action", "list_nft_for_auction")
         .add_attribute("auction_id", state.auction_count.to_string())
         .add_attribute("creator", owner.clone())

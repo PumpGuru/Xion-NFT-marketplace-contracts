@@ -76,6 +76,7 @@ pub struct InstantiateMsg {
 pub enum ListingHookMsg {
     SetListing {
         owner: String,
+        collection: String,
         token_id: String,
         price: Uint128,
         royalty: Uint128,
@@ -87,6 +88,7 @@ pub enum ListingHookMsg {
 pub enum AuctionListingHookMsg {
     SetAuctionListing {
         owner: String,
+        collection: String,
         token_id: String,
         start_price: Uint128,
         min_bid_step: Uint128,
