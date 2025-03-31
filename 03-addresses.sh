@@ -1,0 +1,7 @@
+# addresses
+
+NFT_Marketplace: xion14j55majznaasw9upyf7ddpflrpy4qakag034wgs7wjdfn0q52fkqjvavld
+CW20 token impl   xion1nndkf299q2sfkjxxp60zfpqz87ju7374durk9haeqjuncclw64dqa0geqj
+NFT token impl: xion16pxfzmt6h9fj8eywgcew5e3j52fj4uaa6vqzjxv0du8xs46fkfjslz6ysk
+User: xion1nmx9wtrkmdvfkrnrwkxc5uyduqa4l29wg3vd8e
+AccountManager: xion18fjq9gnzjmjgs5tmle94654uhu8vjfj25d82n8skxk7cu0jksf4qztqqkn
